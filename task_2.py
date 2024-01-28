@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import scipy.integrate as spi
 import numpy as np
+import random
 
 
 def f(x):
@@ -21,15 +22,23 @@ limit_x = np.linspace(a, b)
 limit_y = f(limit_x)
 ax.fill_between(limit_x, limit_y, color="gray", alpha=0.3)
 
-points = 100000
-random_x = np.random.uniform(a, b, points)
-random_y = np.random.uniform(0, f(b), points)
 
-points_under_curve = sum(random_y <= f(random_x))
-area = (b - a) * f(b)
-area_under_curve = area * (points_under_curve / points)
+def monte_carlo_integration(a, b, num_points):
+    count_under_curve = 0
 
-quad_value, error = spi.quad(f, a, b)
+    for _ in range(num_points):
+        x = random.uniform(a, b)
+        y = random.uniform(0, max(f(a), f(b)))
+
+        if y <= f(x):
+            count_under_curve += 1
+
+    ratio = count_under_curve / num_points
+
+    integral_value = ratio * (b - a) * max(f(a), f(b))
+
+    return integral_value
+
 
 ax.axvline(x=a, color="gray", linestyle="--")
 ax.axvline(x=b, color="gray", linestyle="--")
@@ -43,5 +52,10 @@ ax.set_ylabel("f(x)")
 plt.grid()
 plt.show()
 
-print("Значення методом Монте-Карло:", area_under_curve)
+points = 100000
+
+monte_carlo_value = monte_carlo_integration(a, b, points)
+quad_value, error = spi.quad(f, a, b)
+
+print("Значення методом Монте-Карло:", monte_carlo_value)
 print("Точне значення:", quad_value)
